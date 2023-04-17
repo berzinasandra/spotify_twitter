@@ -1,41 +1,45 @@
 from dotenv import load_dotenv # pip3 install python-dotenv
 import os
+import logging
 from helpers.common_functions import make_request
 from helpers.common_functions import Artist, Event
 load_dotenv()
 
 TICKETMASTER_KEY = os.getenv('TICKETMASTER_KEY')
 
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger("TICKETMASTER")
+logger.setLevel(logging.INFO)
 
 class TicketmasterAPI:
     def __init__(self, tracks:list[Artist]):
         self.tracks = tracks
         self.all_events = []
+        self.checked_artists = []
         
 
     def run(self):
-        checked_artists = []
         for item in self.tracks:
             for artist in item.artists:
-                if artist in checked_artists:
-                    continue
-                elif artist not in checked_artists:
-                    checked_artists.append(artist)
-                city = 'Amsterdam'
-                artist= artist.lower().replace(" ", "_").replace("-", "_")
-                
-                url = f'https://app.ticketmaster.com/discovery/v2/events.json?keyword={artist}&city={city}&apikey={TICKETMASTER_KEY}'
-
-                data = make_request(url, service='ticketmaster')
-                
-                if data and data.get('page', dict()).get('totalElements') == 0:
-                    continue
-                    # NOTE: Try different city/ Europe 
-                    # url = f'https://app.ticketmaster.com/discovery/v2/events.json?keyword={artist}&apikey={TICKETMASTER_KEY}'
-                    # data = make_request(url, service='ticketmaster')
-                
-                self.parse_data(data, artist) if data else None
+                self._find_event(artist)  
         return self.all_events
+
+    def _find_event(self, artist:str):
+        if artist in self.checked_artists:
+            return
+        elif artist not in self.checked_artists:
+            self.checked_artists.append(artist)
+        
+        city = 'Amsterdam'
+        artist= artist.lower().replace(" ", "_").replace("-", "_")
+        
+        url = f'https://app.ticketmaster.com/discovery/v2/events.json?keyword={artist}&city={city}&apikey={TICKETMASTER_KEY}'
+        data = make_request(url, service='ticketmaster')
+        
+        if data and data.get('page', dict()).get('totalElements') == 0:
+            return
+        
+        self.parse_data(data, artist) if data else None
 
     def parse_data(self, data:dict, artist:str):
         events = data.get('_embedded', dict()).get("events")
@@ -47,9 +51,8 @@ class TicketmasterAPI:
     def parse_details(self, events:dict, artist:str):
         parsed= []
         if not events:
-            # print(f"No events for artist {artist}")
             return
-        print(f"Found events for artist {artist}")
+        logger.info(f"Found events for artist {artist}")
         for event in events:
             parsed.append(Event(
                 event.get('name', None),

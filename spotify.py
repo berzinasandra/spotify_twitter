@@ -23,7 +23,6 @@ class SpotifyAPI:
         self.playlist_names = [
             {"playlist_name":'My Shazam Tracks', "endpoint": 'https://api.spotify.com/v1/playlists/'+ SPOTIFY_SHAZAM_PLAYLIST_ID +'/tracks?&offset='},
             {"playlist_name":'Star', "endpoint": 'https://api.spotify.com/v1/playlists/'+ SPOTIFY_STAR_PLAYLIST_ID + '/tracks?&offset='},
-            # {"playlist_name":'Recently Played', "endpoint": 'https://api.spotify.com/v1/me/tracks?offset='},
         ]
         self.all_tracks = []
 
