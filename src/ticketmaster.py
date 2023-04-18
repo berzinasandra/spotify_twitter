@@ -1,6 +1,12 @@
-from dotenv import load_dotenv  # pip3 install python-dotenv
+"""
+Calls Ticketmaster API endpoint to get event data in Amsterdam
+based on the artist that was collected from Spotify playlist API 
+and format the data.
+"""
+
 import os
 import logging
+from dotenv import load_dotenv  # pip3 install python-dotenv
 from helpers.common_functions import make_request
 from helpers.common_functions import Artist, Event
 
@@ -28,19 +34,21 @@ class TicketmasterAPI:
     def _find_event(self, artist: str):
         if artist in self.checked_artists:
             return
-        elif artist not in self.checked_artists:
-            self.checked_artists.append(artist)
-
+        
+        self.checked_artists.append(artist)
+   
         city = "Amsterdam"
         artist = artist.lower().replace(" ", "_").replace("-", "_")
 
-        url = f"https://app.ticketmaster.com/discovery/v2/events.json?keyword={artist}&city={city}&apikey={TICKETMASTER_KEY}"
+        url = f"https://app.ticketmaster.com/discovery/v2/events.json?keyword=\
+                {artist}&city={city}&apikey={TICKETMASTER_KEY}"
         data = make_request(url, service="ticketmaster")
 
         if data and data.get("page", dict()).get("totalElements") == 0:
             return
 
-        self.parse_data(data, artist) if data else None
+        if data:
+            self.parse_data(data, artist)
 
     def parse_data(self, data: dict, artist: str):
         events = data.get("_embedded", dict()).get("events")
@@ -74,13 +82,13 @@ class TicketmasterAPI:
                     [
                         venue
                         for venue in event.get("_embedded", dict()).get(
-                            "venues", list()
+                            "venues", None
                         )
                     ],
                     [
                         genre.get("externalLinks")
                         for genre in event.get("_embedded", dict()).get(
-                            "attractions", list()
+                            "attractions", None
                         )
                     ],
                 )

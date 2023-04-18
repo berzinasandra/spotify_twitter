@@ -1,3 +1,6 @@
+"""
+Main file to run the event finder
+"""
 import logging
 from spotify import SpotifyAPI
 from ticketmaster import TicketmasterAPI
@@ -8,10 +11,15 @@ logger.setLevel(logging.INFO)
 
 
 def search_events():
+    """
+    First gets all artists that all in Stared and Shazam playlist.
+
+    Returns:
+        list: list of events
+    """
     tracks = SpotifyAPI().run()
     events = TicketmasterAPI(tracks).run() if tracks else None
 
-    # logger.info(f"FOUND EVENTS FOR ARTIST \n {[event.get('artist') for event in events if event]}")
     return [event.get("artist") for event in events if event]
 
 

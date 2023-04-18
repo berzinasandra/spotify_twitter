@@ -1,14 +1,17 @@
-import requests
+"""
+Calls Spotify API endpoint to get tracks from playlists
+and format the recieve data 
+"""
+
 from dotenv import load_dotenv  # pip3 install python-dotenv
 import os
-from dataclasses import dataclass
-from datetime import datetime
 import logging
 from helpers.common_functions import make_request
 from helpers.common_functions import Artist
 from helpers.generate_token import get_token
 
-# TO GET TOKEN NEW https://developer.spotify.com/console/get-artist-albums/?id=&include_groups=&market=&limit=&offset=
+# TO GET TOKEN NEW 
+# https://developer.spotify.com/console/get-artist-albums/?id=&include_groups=&market=&limit=&offset=
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger("SPOTIFY")
@@ -45,7 +48,9 @@ class SpotifyAPI:
             while songs_in_playlist:
                 url = playlist.get("endpoint", None)
                 logger.info(
-                    f"Collecting songs from playlist {playlist.get('playlist_name', None)}, offset {offset}"
+                    f"Collecting songs from playlist \
+                    {playlist.get('playlist_name', None)}, \
+                    offset {offset}"
                 )
                 tracks = make_request(url, offset, "spotify", spotify_token)
                 offset += 100
