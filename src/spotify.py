@@ -10,8 +10,6 @@ from helpers.common_functions import make_request
 from helpers.common_functions import Artist
 from helpers.generate_token import get_token
 
-# TO GET TOKEN NEW 
-# https://developer.spotify.com/console/get-artist-albums/?id=&include_groups=&market=&limit=&offset=
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger("SPOTIFY")
