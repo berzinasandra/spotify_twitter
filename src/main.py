@@ -18,10 +18,17 @@ def search_events():
         list: list of events
     """
     tracks = SpotifyAPI().run()
-    events = TicketmasterAPI(tracks).run() if tracks else None
+    # events = TicketmasterAPI(tracks).run() if tracks else None
 
-    return [event.get("artist") for event in events if event]
+    # return [event.get("artist") for event in events if event]
 
+# Add cash to Spotify api
+# Check when last time playlist was updated 
+# Add linting
+# Add docstrings and formatting
+# Move .env to github secrets
+# test
+# alembic
 
 if "__main__" == __name__:
     print(search_events())

@@ -7,8 +7,8 @@ and format the data.
 import os
 import logging
 from dotenv import load_dotenv  # pip3 install python-dotenv
-from helpers.common_functions import make_request
-from helpers.common_functions import Artist, Event
+from helpers.api_requests import make_request
+from helpers.variables import Artist, Event
 
 load_dotenv()
 

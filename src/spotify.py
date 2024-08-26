@@ -6,9 +6,12 @@ and format the recieve data
 from dotenv import load_dotenv  # pip3 install python-dotenv
 import os
 import logging
-from helpers.common_functions import make_request
-from helpers.common_functions import Artist
-from helpers.generate_token import get_token
+from helpers.api_requests import make_request, get_token
+from helpers.utils import list_files, read_file, save_as_parquet
+from helpers.variables import Artist
+from helpers.variables import SPOTIFY_RAW_DATA_PATH, SPOTIFY_PROCESSED_DATA_PATH
+from pandas import DataFrame
+import pandas as pd
 
 
 logging.basicConfig(level=logging.INFO)
@@ -38,39 +41,64 @@ class SpotifyAPI:
         ]
         self.all_tracks = []
 
+    
     def run(self):
-        spotify_token = get_token()
         for playlist in self.playlist_names:
-            offset = 0
-            songs_in_playlist = True
-            while songs_in_playlist:
-                url = playlist.get("endpoint", None)
-                logger.info(
-                    f"Collecting songs from playlist \
-                    {playlist.get('playlist_name', None)}, \
-                    offset {offset}"
-                )
-                tracks = make_request(url, offset, "spotify", spotify_token)
-                offset += 100
-                songs_in_playlist = True if tracks else False
-                if songs_in_playlist:
-                    self.parse_details(tracks)
+            self.extract_tracks_from_playlist(playlist)
+            
+        self.extract_track_details()
+        self.parse_details()
 
-        return self.all_tracks
-
-    def parse_details(self, items: dict):
-        for item in items:
-            if not item:
-                continue
-            self.all_tracks.append(
-                Artist(
-                    item.get("added_at", None),
-                    [
-                        artist["name"]
-                        for artist in item.get("track", dict()).get("artists", list())
-                    ],
-                    item.get("track", dict()).get("name", None),
-                    item.get("track", dict()).get("album", dict()).get("images"),
-                    item.get("track", dict()).get("album", dict()).get("release_date"),
-                )
+    def extract_tracks_from_playlist(self, playlist:dict[str, str]) -> None:
+        spotify_token = get_token()
+        offset = 0
+        songs_in_playlist = True
+        while songs_in_playlist:
+            url = playlist.get("endpoint", None)
+            logger.info(
+                f"Collecting songs from playlist"
+                f"{playlist.get('playlist_name', None)},"
+                f"offset {offset}"
             )
+            tracks = make_request(url, offset, "spotify", spotify_token)
+            offset += 100
+            # songs_in_playlist = True if tracks else False
+            songs_in_playlist = False
+
+    def extract_track_details(self) -> None:
+        """_summary_
+        """
+        import pandas as pd
+        files = list_files(SPOTIFY_RAW_DATA_PATH)
+        for file in files:
+            logger.info(f"Start parsing details from file {file}")
+            df = read_file(file)
+            details_df = self.parse_details(df)
+            file_name = file.split('/')[-1].split(".")[0]
+            output_path = f"{SPOTIFY_PROCESSED_DATA_PATH}{file_name}.parquet"
+            import pdb;pdb.set_trace()
+            save_as_parquet(details_df, output_path)
+
+
+
+
+
+    def parse_details(self, df: DataFrame):
+        details: list[Artist] = []
+        for row in df.itertuples():
+            added_at = row.added_at
+            track = row.track
+            artists = [artist["name"] for artist in track["artists"]]
+            song_title = track.get('name', None)
+            album_image= track.get('album', None).get("images")
+            release_date = track.get('album', None).get("release_date")
+            details.append(Artist(
+                added_at,
+                artists, 
+                song_title,
+                album_image,
+                release_date,
+            ))
+
+        return pd.DataFrame(details)
+
