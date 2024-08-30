@@ -1,17 +1,13 @@
-"""
-Calls Spotify API endpoint to get tracks from playlists
-and format the recieve data 
-"""
-
 from dotenv import load_dotenv  # pip3 install python-dotenv
 import os
 import logging
-from helpers.api_requests import make_request, get_token
+from helpers.api_requests import retrieve_data, get_token
 from helpers.utils import list_files, read_file, save_as_parquet
 from helpers.variables import Artist
 from helpers.variables import SPOTIFY_RAW_DATA_PATH, SPOTIFY_PROCESSED_DATA_PATH
 from pandas import DataFrame
 import pandas as pd
+
 
 
 logging.basicConfig(level=logging.INFO)
@@ -25,6 +21,10 @@ SPOTIFY_STAR_PLAYLIST_ID = os.getenv("SPOTIFY_STAR_PLAYLIST_ID")
 
 class SpotifyAPI:
     def __init__(self):
+        """
+        Calls Spotify API endpoint to get tracks from defined playlists
+        and parse and save data locally. 
+        """
         self.playlist_names = [
             {
                 "playlist_name": "My Shazam Tracks",
@@ -43,6 +43,9 @@ class SpotifyAPI:
 
     
     def run(self):
+        """
+        Executes collection and parsing of track details from Spotify playlists
+        """
         for playlist in self.playlist_names:
             self.extract_tracks_from_playlist(playlist)
             
@@ -50,6 +53,12 @@ class SpotifyAPI:
         self.parse_details()
 
     def extract_tracks_from_playlist(self, playlist:dict[str, str]) -> None:
+        """Extracts trak details from given playlits
+
+        Args:
+            playlist (dict[str, str]): details on playlist
+
+        """
         spotify_token = get_token()
         offset = 0
         songs_in_playlist = True
@@ -60,13 +69,14 @@ class SpotifyAPI:
                 f"{playlist.get('playlist_name', None)},"
                 f"offset {offset}"
             )
-            tracks = make_request(url, offset, "spotify", spotify_token)
+            retrieve_data(url, offset, "spotify", spotify_token)
             offset += 100
             # songs_in_playlist = True if tracks else False
             songs_in_playlist = False
 
     def extract_track_details(self) -> None:
-        """_summary_
+        """
+        Loops through locall files of raw data and parses data in needed format
         """
         import pandas as pd
         files = list_files(SPOTIFY_RAW_DATA_PATH)
@@ -80,10 +90,15 @@ class SpotifyAPI:
             save_as_parquet(details_df, output_path)
 
 
+    def parse_details(self, df: DataFrame) -> DataFrame:
+        """Parses data from raw data 
 
+        Args:
+            df (DataFrame): DataFrame of raw data
 
-
-    def parse_details(self, df: DataFrame):
+        Returns:
+            DataFrame: parsed details formatted into pandas DataFrame
+        """
         details: list[Artist] = []
         for row in df.itertuples():
             added_at = row.added_at

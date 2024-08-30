@@ -13,32 +13,35 @@ def save_as_parquet(df: DataFrame, output_path:str) -> None:
     """Save given Dataframe locally to output path
 
     Args:
-        df (DataFrame): _description_
-        output_path (str): 
+        df (DataFrame): DataFrame to save
+        output_path (str): path where to save parquet file
+
+    Returns:
+        None, writes to disk
     """
     logger.info(f"Saving DataFrame locally to {output_path} as parquet file.")
     df.to_parquet(output_path)
 
 def read_file(file:str) -> DataFrame:
-    """_summary_
+    """Reads parquet files as DataFrame
 
     Args:
-        file (str): _description_
+        file (str): file to read
 
     Returns:
-        DataFrame: _description_
+        DataFrame: file context in DataFrame
     """
     logger.info(f"reading file {file}") 
     return pd.read_parquet(file)
 
 def list_files(path:str) -> list[str]:
-    """_summary_
+    """Lists files in given path 
 
     Args:
-        path (str): _description_
+        path (str): local path
 
     Returns:
-        list[str]: _description_
+        list[str]: list of files in given path
     """
     files = [f for f in glob(f"{path}/*.parquet")]
     logger.info(f"Found raw {len(files)} files in path {path} - {files}")
