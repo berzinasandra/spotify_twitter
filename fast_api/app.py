@@ -5,4 +5,6 @@ app = FastAPI()
 
 
 @app.get("/artists/")
-def 
+def get_all_artists():
+    # Read file
+    
