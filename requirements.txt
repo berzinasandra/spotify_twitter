@@ -6,3 +6,4 @@ pandas
 pyarrow
 glob2
 fastapi[all]
+ipython

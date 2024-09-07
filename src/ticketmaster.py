@@ -7,7 +7,7 @@ and format the data.
 import os
 import logging
 from dotenv import load_dotenv  # pip3 install python-dotenv
-from helpers.api_requests import make_request
+# from helpers.api_requests import make_request
 from helpers.variables import Artist, Event
 
 load_dotenv()
@@ -42,13 +42,13 @@ class TicketmasterAPI:
 
         url = f"https://app.ticketmaster.com/discovery/v2/events.json?keyword=\
                 {artist}&city={city}&apikey={TICKETMASTER_KEY}"
-        data = make_request(url, service="ticketmaster")
+        # data = make_request(url, service="ticketmaster")
 
-        if data and data.get("page", dict()).get("totalElements") == 0:
-            return
+        # if data and data.get("page", dict()).get("totalElements") == 0:
+        #     return
 
-        if data:
-            self.parse_data(data, artist)
+        # if data:
+        #     self.parse_data(data, artist)
 
     def parse_data(self, data: dict, artist: str):
         events = data.get("_embedded", dict()).get("events")

@@ -103,12 +103,14 @@ class SpotifyAPI:
         for row in df.itertuples():
             added_at = row.added_at
             track = row.track
+            main_artist = track["artists"][0].get("name", None)if len(track["artists"]) > 0 else None
             artists = [artist["name"] for artist in track["artists"]]
             song_title = track.get('name', None)
             album_image= track.get('album', None).get("images")
             release_date = track.get('album', None).get("release_date")
             details.append(Artist(
                 added_at,
+                main_artist,
                 artists, 
                 song_title,
                 album_image,

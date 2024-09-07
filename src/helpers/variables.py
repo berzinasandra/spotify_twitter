@@ -12,6 +12,7 @@ class Artist(NamedTuple):
     Formatting data for artists 
     """
     added_at: datetime
+    main_artist: str
     artists: list
     song_title: dict
     images: list

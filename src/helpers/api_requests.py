@@ -66,7 +66,6 @@ def _retrieve_items(response:Response, service:str) -> list[dict[Any, Any]]:
     """
     if 300 > response.status_code >= 200:
         items = response.json()
-        import pdb;pdb.set_trace()
         return items['tracks']['items'] if service == 'spotify' else items
 
 
