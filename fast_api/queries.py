@@ -7,6 +7,7 @@ from typing import Optional, Union, TypedDict
 # TODO: load data in DB
 # TODO: read data from DB 
 
+DATE_FORMAT = "YYYY-MM-DD"
 
 class ArtistSongs(TypedDict):
     artist: str
@@ -53,7 +54,6 @@ def retrieve_all_songs_from_artist(artist:str) -> Union[ArtistSongs, list[Artist
     artist = artist.title()
     artist_df = df[df["main_artist"] == artist]
     if artist_df.empty:
-        # TODO: try to find closest match 
         artist_df = df[df["main_artist"].str.contains(artist)]
         if artist_df.empty:
             return f"No such artist - {artist } found"
@@ -69,9 +69,15 @@ def retrieve_all_songs_from_artist(artist:str) -> Union[ArtistSongs, list[Artist
     return {artist: songs}
 
 
-def retrieve_details_based_on_date(date):
-    ...
-    # TODO: 
-    # format date in right format, if not possible error out
-    # chekck if date in past ??
+def retrieve_details_based_on_dates(start:str, end:str, date_type) -> list:
+    df = _read_all_files()
+    
+    specified_timeframe_df = df[(df[date_type] >= start) & (df[date_type] <= end)]
+
+    if specified_timeframe_df:
+        return f"No data found with start date {start}, end date {end} for date type {date_type}"
+    import pdb;pdb.set_trace()
+    result = specified_timeframe_df[["main_artist", "song_title", date_type]].apply(lambda x: x.to_dict(), axis=1).to_list()
+    return result
+   
 

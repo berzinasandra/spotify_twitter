@@ -1,6 +1,12 @@
-from fastapi import FastAPI
+from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel
-from fast_api.queries import retrieve_all_artists, retrieve_all_songs_from_artist, retrieve_details_based_on_date
+from fast_api.queries import retrieve_all_artists, retrieve_all_songs_from_artist, retrieve_details_based_on_dates
+import enum
+DATE_FORMAT = "YYYY-MM-DD"
+
+class DateType(enum):
+    ADDED_AT = "added_at"
+    RELEASE_DATE = "release_date"
 
 app = FastAPI()
 
@@ -16,7 +22,24 @@ def get_all_artists(artist):
     return retrieve_all_songs_from_artist(artist)
 
 
-@app.get("/artists/{date}")
-def get_all_artists(date):
-    # Needed format is YYYY-MM-DD
-    return retrieve_details_based_on_date(date)
+@app.get("/dates/")
+def get_tracks_based_on_dates(start:str, end:str, date_type: str):
+    def _valid_dates(start:str, end:str) -> bool:
+        import datetime
+        try: 
+            start_result, end_result = bool(datetime.strptime(start, DATE_FORMAT)), bool(datetime.strptime(end, DATE_FORMAT))
+        except ValueError:
+            start_result, end_result = False, False
+        return start_result, end_result
+    
+    if not _valid_dates(start, end):
+        HTTPException(status_code=404, detail=f"Invalid start and/or end date: start date - {start}, end date - {end}")
+
+    if date_type in [DateType.ADDED_AT, DateType.RELEASE_DATE]:
+        HTTPException(status_code=404, detail=f"Invalid date type, excepted {DateType.ADDED_AT} or {DateType.RELEASE_DATE}")
+
+    details = retrieve_details_based_on_dates(start, end, date_type)
+    return {date_type: details}
+    
+    
+
