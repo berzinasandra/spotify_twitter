@@ -8,8 +8,11 @@ import os
 import logging
 from dotenv import load_dotenv  # pip3 install python-dotenv
 
-# from helpers.api_requests import make_request
-from helpers.variables import Artist, Event
+from helpers.api_requests import make_request
+from helpers.variables import Event
+from helpers.utils import list_files
+import pandas as pd
+from helpers.variables import SPOTIFY_PROCESSED_DATA_PATH
 
 load_dotenv()
 
@@ -21,36 +24,47 @@ logger.setLevel(logging.INFO)
 
 
 class TicketmasterAPI:
-    def __init__(self, tracks: list[Artist]):
-        self.tracks = tracks
+    def __init__(self):
+        self.artists: list = []
         self.all_events = []
         self.checked_artists = []
 
     def run(self):
-        for item in self.tracks:
-            for artist in item.artists:
-                self._find_event(artist)
-        return self.all_events
+        """Executes Ticketmaster API class.
+        1. Reads all processed files from spotify
+        2. Gets unique artists TODO: save unique artists soemwhere else.
+        3. Query Ticketmaster API
+        4. Save results (for now locally) TODO: upgrade this
+        5. Process results
+        """
+        files = list_files(SPOTIFY_PROCESSED_DATA_PATH)
+        for file in files:
+            logger.info(f"Reading {file} and collecting unique artists")
+            df = pd.read_parquet(file)
+            self.artists.append(df["main_artist"].unique().tolist())
+
+        self.artists = set(self.artists)
+        for artist in self.artists:
+            self._find_event(artist)
 
     def _find_event(self, artist: str):
-        ...
-        # if artist in self.checked_artists:
-        #     return
+        if artist in self.checked_artists:
+            return
 
-        # self.checked_artists.append(artist)
+        self.checked_artists.append(artist)
 
-        # city = "Amsterdam"
-        # artist = artist.lower().replace(" ", "_").replace("-", "_")
+        city = "Amsterdam"
+        artist = artist.lower().replace(" ", "_").replace("-", "_")
 
-        # url = f"https://app.ticketmaster.com/discovery/v2/events.json?keyword=\
-        #         {artist}&city={city}&apikey={TICKETMASTER_KEY}"
-        # data = make_request(url, service="ticketmaster")
+        url = f"https://app.ticketmaster.com/discovery/v2/events.json?keyword=\
+                {artist}&city={city}&apikey={TICKETMASTER_KEY}"
+        data = make_request(url, service="ticketmaster")
 
-        # if data and data.get("page", dict()).get("totalElements") == 0:
-        #     return
+        if data and data.get("page", dict()).get("totalElements") == 0:
+            return
 
-        # if data:
-        #     self.parse_data(data, artist)
+        if data:
+            self.parse_data(data, artist)
 
     def parse_data(self, data: dict, artist: str):
         events = data.get("_embedded", dict()).get("events")
