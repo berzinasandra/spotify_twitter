@@ -9,7 +9,6 @@ from pandas import DataFrame
 import pandas as pd
 
 
-
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger("SPOTIFY")
 logger.setLevel(logging.INFO)
@@ -23,7 +22,7 @@ class SpotifyAPI:
     def __init__(self):
         """
         Calls Spotify API endpoint to get tracks from defined playlists
-        and parse and save data locally. 
+        and parse and save data locally.
         """
         self.playlist_names = [
             {
@@ -41,18 +40,17 @@ class SpotifyAPI:
         ]
         self.all_tracks = []
 
-    
     def run(self):
         """
         Executes collection and parsing of track details from Spotify playlists
         """
         for playlist in self.playlist_names:
             self.extract_tracks_from_playlist(playlist)
-            
+
         self.extract_track_details()
         self.parse_details()
 
-    def extract_tracks_from_playlist(self, playlist:dict[str, str]) -> None:
+    def extract_tracks_from_playlist(self, playlist: dict[str, str]) -> None:
         """Extracts trak details from given playlits
 
         Args:
@@ -78,20 +76,20 @@ class SpotifyAPI:
         """
         Loops through locall files of raw data and parses data in needed format
         """
-        import pandas as pd
         files = list_files(SPOTIFY_RAW_DATA_PATH)
         for file in files:
             logger.info(f"Start parsing details from file {file}")
             df = read_file(file)
             details_df = self.parse_details(df)
-            file_name = file.split('/')[-1].split(".")[0]
+            file_name = file.split("/")[-1].split(".")[0]
             output_path = f"{SPOTIFY_PROCESSED_DATA_PATH}{file_name}.parquet"
-            import pdb;pdb.set_trace()
+            import pdb
+
+            pdb.set_trace()
             save_as_parquet(details_df, output_path)
 
-
     def parse_details(self, df: DataFrame) -> DataFrame:
-        """Parses data from raw data 
+        """Parses data from raw data
 
         Args:
             df (DataFrame): DataFrame of raw data
@@ -103,19 +101,24 @@ class SpotifyAPI:
         for row in df.itertuples():
             added_at = row.added_at
             track = row.track
-            main_artist = track["artists"][0].get("name", None)if len(track["artists"]) > 0 else None
+            main_artist = (
+                track["artists"][0].get("name", None)
+                if len(track["artists"]) > 0
+                else None
+            )
             artists = [artist["name"] for artist in track["artists"]]
-            song_title = track.get('name', None)
-            album_image= track.get('album', None).get("images")
-            release_date = track.get('album', None).get("release_date")
-            details.append(Artist(
-                added_at,
-                main_artist,
-                artists, 
-                song_title,
-                album_image,
-                release_date,
-            ))
+            song_title = track.get("name", None)
+            album_image = track.get("album", None).get("images")
+            release_date = track.get("album", None).get("release_date")
+            details.append(
+                Artist(
+                    added_at,
+                    main_artist,
+                    artists,
+                    song_title,
+                    album_image,
+                    release_date,
+                )
+            )
 
         return pd.DataFrame(details)
-

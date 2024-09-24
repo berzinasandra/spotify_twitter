@@ -1,12 +1,13 @@
 """
 Calls Ticketmaster API endpoint to get event data in Amsterdam
-based on the artist that was collected from Spotify playlist API 
+based on the artist that was collected from Spotify playlist API
 and format the data.
 """
 
 import os
 import logging
 from dotenv import load_dotenv  # pip3 install python-dotenv
+
 # from helpers.api_requests import make_request
 from helpers.variables import Artist, Event
 
@@ -32,16 +33,17 @@ class TicketmasterAPI:
         return self.all_events
 
     def _find_event(self, artist: str):
-        if artist in self.checked_artists:
-            return
-        
-        self.checked_artists.append(artist)
-   
-        city = "Amsterdam"
-        artist = artist.lower().replace(" ", "_").replace("-", "_")
+        ...
+        # if artist in self.checked_artists:
+        #     return
 
-        url = f"https://app.ticketmaster.com/discovery/v2/events.json?keyword=\
-                {artist}&city={city}&apikey={TICKETMASTER_KEY}"
+        # self.checked_artists.append(artist)
+
+        # city = "Amsterdam"
+        # artist = artist.lower().replace(" ", "_").replace("-", "_")
+
+        # url = f"https://app.ticketmaster.com/discovery/v2/events.json?keyword=\
+        #         {artist}&city={city}&apikey={TICKETMASTER_KEY}"
         # data = make_request(url, service="ticketmaster")
 
         # if data and data.get("page", dict()).get("totalElements") == 0:
@@ -81,9 +83,7 @@ class TicketmasterAPI:
                     event.get("promoter", dict()),
                     [
                         venue
-                        for venue in event.get("_embedded", dict()).get(
-                            "venues", None
-                        )
+                        for venue in event.get("_embedded", dict()).get("venues", None)
                     ],
                     [
                         genre.get("externalLinks")

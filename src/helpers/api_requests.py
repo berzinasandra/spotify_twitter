@@ -1,13 +1,13 @@
+import functools
 from dotenv import load_dotenv  # pip3 install python-dotenv
 import logging
 from typing import Any
 import requests
 from requests import Response
 import os
-from dotenv import load_dotenv
 from helpers.utils import save_as_parquet
+
 load_dotenv()
-import functools
 
 SPOTIFY_CLIENT_ID = os.getenv("SPOTIFY_CLIENT_ID")
 SPOTIFY_CLIENT_SECRET = os.getenv("SPOTIFY_CLIENT_SECRET")
@@ -19,7 +19,7 @@ logger.setLevel(logging.INFO)
 load_dotenv()
 
 
-def _make_spotify_request(url:str, offset:int, spotify_token:str) -> Response:
+def _make_spotify_request(url: str, offset: int, spotify_token: str) -> Response:
     """Make a request to Spotify API
 
     Args:
@@ -35,7 +35,9 @@ def _make_spotify_request(url:str, offset:int, spotify_token:str) -> Response:
     return requests.get(url + str(offset), headers=header)
 
 
-def _request_endpoint(service:str, url:str, offset:int, spotify_token:str) -> Response:
+def _request_endpoint(
+    service: str, url: str, offset: int, spotify_token: str
+) -> Response:
     """Call given service API and return request response
 
     Args:
@@ -53,9 +55,10 @@ def _request_endpoint(service:str, url:str, offset:int, spotify_token:str) -> Re
         response = requests.get(url)
     return response
 
+
 @functools.cache
-def _retrieve_items(response:Response, service:str) -> list[dict[Any, Any]]:
-    """Fetch data from API response 
+def _retrieve_items(response: Response, service: str) -> list[dict[Any, Any]]:
+    """Fetch data from API response
 
     Args:
         response (Response): API call's resposne
@@ -66,10 +69,10 @@ def _retrieve_items(response:Response, service:str) -> list[dict[Any, Any]]:
     """
     if 300 > response.status_code >= 200:
         items = response.json()
-        return items['tracks']['items'] if service == 'spotify' else items
+        return items["tracks"]["items"] if service == "spotify" else items
 
 
-def _unsecessful_request(response: Response, service:str) -> bool:
+def _unsecessful_request(response: Response, service: str) -> bool:
     """Checks if response status has been unsecessful
 
     Args:
@@ -85,12 +88,12 @@ def _unsecessful_request(response: Response, service:str) -> bool:
     elif response.status_code > 300:
         logger.info(f"FAILED {response.status_code} - {response.text}")
         return True
-    
+
 
 def get_token() -> None:
     """
     Generates Spotify token using Spotify Client ID
-    and Spotify Client Secret as identifier. 
+    and Spotify Client Secret as identifier.
     """
     url = "https://accounts.spotify.com/api/token"
     header = {"Content-Type": "application/x-www-form-urlencoded"}
@@ -108,7 +111,7 @@ def get_token() -> None:
 def retrieve_data(
     url: str = None, offset: int = None, service: str = None, spotify_token: str = None
 ) -> None:
-    """Retrieve data from given service API and save it locally 
+    """Retrieve data from given service API and save it locally
 
     Args:
         url (str, optional): API URL. Defaults to None.
@@ -126,19 +129,18 @@ def retrieve_data(
     if _unsecessful_request(response, service) and service == "spotify":
         logger.info("Creating new token...")
         response = _request_endpoint(service, url, offset, spotify_token)
-        if _unsecessful_request(response, service) :
+        if _unsecessful_request(response, service):
             logger.info("No response from endpoint")
             return []
-    
+
     items = _retrieve_items(response, service)
     items_df = pd.DataFrame(items)
     if service == "spotify":
         output_path = f"{SPOTIFY_RAW_DATA_PATH}/spotify_{offset}.parquet"
     else:
         output_path = f"{TICKETMASTER_RAW_DATA_PATH}/ticketmaster_{offset}.parquet"
-        
-    save_as_parquet(items_df, output_path)
 
+    save_as_parquet(items_df, output_path)
 
 
 if __name__ == "__main__":
