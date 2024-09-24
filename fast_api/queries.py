@@ -7,8 +7,6 @@ from typing import Union, TypedDict
 # TODO: load data in DB
 # TODO: read data from DB
 
-DATE_FORMAT = "YYYY-MM-DD"
-
 
 class ArtistSongs(TypedDict):
     artist: str
@@ -76,16 +74,23 @@ def retrieve_all_songs_from_artist(
     return {artist: songs}
 
 
-def retrieve_details_based_on_dates(start: str, end: str, date_type) -> list:
+def retrieve_details_based_on_dates(start: str, end: str, date_type: str) -> list:
+    """Retrieves song details based on given start and end date for either release date or added_at date
+
+    Args:
+        start (str): start date
+        end (str): end date
+        date_type (str): release date or added_at date
+
+    Returns:
+        list: list of songs and artis name
+    """
     df = _read_all_files()
 
     specified_timeframe_df = df[(df[date_type] >= start) & (df[date_type] <= end)]
 
     if specified_timeframe_df:
         return f"No data found with start date {start}, end date {end} for date type {date_type}"
-    import pdb
-
-    pdb.set_trace()
     result = (
         specified_timeframe_df[["main_artist", "song_title", date_type]]
         .apply(lambda x: x.to_dict(), axis=1)
