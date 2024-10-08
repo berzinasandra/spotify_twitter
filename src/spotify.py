@@ -1,10 +1,10 @@
 from dotenv import load_dotenv  # pip3 install python-dotenv
 import os
 import logging
-from helpers.api_requests import retrieve_data, get_token
+from helpers.spotify.api_requests import retrieve_data, get_token
 from helpers.utils import list_files, read_file, save_as_parquet
-from helpers.variables import Artist
-from helpers.variables import SPOTIFY_RAW_DATA_PATH, SPOTIFY_PROCESSED_DATA_PATH
+from helpers.spotify.variables import Artist
+from helpers.spotify.variables import SPOTIFY_RAW_DATA_PATH, SPOTIFY_PROCESSED_DATA_PATH
 from pandas import DataFrame
 import pandas as pd
 
@@ -48,7 +48,7 @@ class SpotifyAPI:
             self.extract_tracks_from_playlist(playlist)
 
         self.extract_track_details()
-        self.parse_details()
+        # self.parse_details()
 
     def extract_tracks_from_playlist(self, playlist: dict[str, str]) -> None:
         """Extracts trak details from given playlits
@@ -83,9 +83,6 @@ class SpotifyAPI:
             details_df = self.parse_details(df)
             file_name = file.split("/")[-1].split(".")[0]
             output_path = f"{SPOTIFY_PROCESSED_DATA_PATH}{file_name}.parquet"
-            import pdb
-
-            pdb.set_trace()
             save_as_parquet(details_df, output_path)
 
     def parse_details(self, df: DataFrame) -> DataFrame:

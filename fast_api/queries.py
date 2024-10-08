@@ -1,6 +1,6 @@
 import pandas as pd
 from pandas import DataFrame
-from src.helpers.variables import SPOTIFY_PROCESSED_DATA_PATH
+from src.helpers.spotify.variables import SPOTIFY_PROCESSED_DATA_PATH
 from src.helpers.utils import list_files
 from typing import Union, TypedDict
 

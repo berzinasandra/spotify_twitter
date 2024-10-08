@@ -3,7 +3,6 @@ Main file to run the event finder
 """
 
 import logging
-from spotify import SpotifyAPI
 from ticketmaster import TicketmasterAPI
 
 logging.basicConfig(level=logging.INFO)
@@ -16,8 +15,8 @@ def run_event_detector():
     """
     First gets all artists that is in Stared and Shazam playlist.
     """
-    SpotifyAPI().run()
-    TicketmasterAPI.run()
+    # SpotifyAPI().run()
+    TicketmasterAPI().run()
 
 
 # Add cash to Spotify api
