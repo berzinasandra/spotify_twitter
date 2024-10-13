@@ -2,7 +2,7 @@ import logging
 from glob import glob
 import pandas as pd
 from pandas import DataFrame
-
+import requests
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger("Utils")
@@ -48,3 +48,9 @@ def list_files(path: str) -> list[str]:
     files = [f for f in glob(f"{path}/*.parquet")]
     logger.info(f"Found raw {len(files)} files in path {path} - {files}")
     return files
+
+
+def create_session():
+    logger.info("Creating Requests Session...")
+    session = requests.Session()
+    return session

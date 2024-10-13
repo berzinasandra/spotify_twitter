@@ -13,12 +13,14 @@ from helpers.ticketmaster.variables import (
     Event,
     TICKETMASTER_RAW_DATA_PATH,
     TICKETMASTER_RAW_FILENAME,
+    TICKETMASTER_PROCESSED_DATA_PATH,
+    TICKETMASTER_PROCESSED_FILENAME,
 )
 from helpers.ticketmaster.api_requests import request_ticketmaster_endpoint
-from helpers.utils import list_files, save_as_parquet
+from helpers.utils import save_as_parquet
 import pandas as pd
-from helpers.spotify.variables import SPOTIFY_PROCESSED_DATA_PATH
-from time import sleep
+from requests import Session
+from typing import Collection
 
 load_dotenv()
 
@@ -32,7 +34,7 @@ logger = logging.getLogger("TICKETMASTER")
 class TicketmasterAPI:
     def __init__(self):
         self.artists: list = []
-        self.all_events = []
+        self.all_events: list[dict[str, Collection[Event]]] = []
         self.checked_artists = []
         self.raw_events = []
 
@@ -42,18 +44,24 @@ class TicketmasterAPI:
         2. Gets unique artists TODO: save unique artists soemwhere else.
         3. Query Ticketmaster API
         4. Save results (for now locally) TODO: upgrade this
-        5. Process results
+        5. Process results & save locally
         """
-        files = list_files(SPOTIFY_PROCESSED_DATA_PATH)
-        self._collect_unique_artists(files)
-
-        for artist in self.artists:
-            sleep(5)
-            self._retrieve_event(artist)
-        df = pd.DataFrame(self.raw_events)
-        # import pdb;pdb.set_trace()
-        save_as_parquet(df, TICKETMASTER_RAW_DATA_PATH + TICKETMASTER_RAW_FILENAME)
+        # files = list_files(SPOTIFY_PROCESSED_DATA_PATH)
+        # self._collect_unique_artists(files)
+        # session = create_session()
+        # for i, artist in enumerate(self.artists, start=1):
+        #     logger.info(f"Starting to search for artist {i}/{len(self.artists)}...")
+        #     self._retrieve_event(artist, session)
+        # df = pd.DataFrame(self.raw_events)
+        # save_as_parquet(df, TICKETMASTER_RAW_DATA_PATH + TICKETMASTER_RAW_FILENAME)
         self.parse_data()
+        import pdb
+
+        pdb.set_trace()
+        df = pd.DataFrame(self.all_events)
+        save_as_parquet(
+            df, TICKETMASTER_PROCESSED_DATA_PATH + TICKETMASTER_PROCESSED_FILENAME
+        )
 
     def _collect_unique_artists(self, files: list):
         """Goes over all files with data collected from Spotify and retrieves unique artists
@@ -68,7 +76,7 @@ class TicketmasterAPI:
         self.artists = set(self.artists)
         logger.info(f"Collected {len(self.artists)} unique artists")
 
-    def _retrieve_event(self, artist: str):
+    def _retrieve_event(self, artist: str, session: Session):
         """_summary_
 
         Args:
@@ -84,31 +92,27 @@ class TicketmasterAPI:
         url = f"{TICKETMASTER_API_URL}{artist}&city={CITY}&apikey={TICKETMASTER_KEY}"
 
         logger.info(f"Looking for events for artist {artist} - {url}")
-        data = request_ticketmaster_endpoint(url)
-
-        # if data and data.get("page", dict()).get("totalElements") == 0:
-        #     # TODO: no concert for artist
-        #     return
+        data = request_ticketmaster_endpoint(url, session)
         self.raw_events.append(data)
 
-        # import pdb;pdb.set_trace()
-
     def parse_data(self):
-        df = pd.read_parquet(TICKETMASTER_RAW_DATA_PATH + TICKETMASTER_RAW_FILENAME)
-        print(df)
-        import pdb
+        df = pd.read_parquet(
+            TICKETMASTER_RAW_DATA_PATH + "/" + TICKETMASTER_RAW_FILENAME
+        )
+        for name, column in df.iterrows():
+            artist_field = column["_links"].get("self", dict()).get("href")
+            artist = artist_field.split("=")[-1].replace("_", " ")
+            if not column["_embedded"]:
+                logger.info(f"No events found for {artist.title()}")
+                continue
 
-        pdb.set_trace()
+            events = column.get("_embedded", dict()).get("events")
+            artist_events = self.parse_events(events, artist)
+            self.all_events.append({"artist": artist, "concerts": artist_events})
 
-        # events = data.get("_embedded", dict()).get("events")
-        # events_of_artist = self.parse_events(events, artist)
-        # self.all_events.append({"artist": artist, "concerts": events_of_artist})
-
-    def parse_events(self, events: dict, artist: str):
+    def parse_events(self, events: dict, artist):
         parsed = []
-        if not events:
-            return
-        logger.info(f"Found events for artist {artist}")
+        logger.info(f"Found events for artist {artist.title()}")
         for event in events:
             parsed.append(
                 Event(
@@ -127,16 +131,9 @@ class TicketmasterAPI:
                         genre.get("genre")
                         for genre in event.get("classifications", list())
                     ],
-                    event.get("promoter", dict()),
                     [
                         venue
                         for venue in event.get("_embedded", dict()).get("venues", None)
-                    ],
-                    [
-                        genre.get("externalLinks")
-                        for genre in event.get("_embedded", dict()).get(
-                            "attractions", None
-                        )
                     ],
                 )
             )

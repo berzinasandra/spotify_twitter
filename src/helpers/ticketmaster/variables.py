@@ -4,6 +4,7 @@ SCHEMA_VERSION = "0.0"
 TICKETMASTER_RAW_DATA_PATH = "data/ticketmaster/raw"
 TICKETMASTER_RAW_FILENAME = "ticketmaster_raw.parquet"
 TICKETMASTER_PROCESSED_DATA_PATH = f"data/ticketmaster/processed/{SCHEMA_VERSION}v/"
+TICKETMASTER_PROCESSED_FILENAME = "ticketmaster_processed.parquet"
 
 CITY = "amsterdam"
 TICKETMASTER_API_URL = "https://app.ticketmaster.com/discovery/v2/events.json?keyword="
@@ -22,6 +23,4 @@ class Event(NamedTuple):
     concert_timezone: str
     tikcet_status: str
     genre: list
-    promoter_info: dict
     venues: list
-    social_media_links: list
