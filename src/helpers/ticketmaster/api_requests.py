@@ -1,6 +1,7 @@
+import logging
+
 import requests
 from requests import Session
-import logging
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger("TICKETMASTER")

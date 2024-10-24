@@ -1,8 +1,10 @@
+from typing import TypedDict, Union
+
 import pandas as pd
 from pandas import DataFrame
+
 from src.helpers.spotify.variables import SPOTIFY_PROCESSED_DATA_PATH
 from src.helpers.utils import list_files
-from typing import Union, TypedDict
 
 # TODO: load data in DB
 # TODO: read data from DB

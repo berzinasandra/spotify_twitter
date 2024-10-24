@@ -8,3 +8,4 @@ glob2
 fastapi[all]
 ipython
 pre-commit
+isort

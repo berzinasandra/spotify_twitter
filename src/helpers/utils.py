@@ -1,8 +1,9 @@
 import logging
 from glob import glob
+
 import pandas as pd
-from pandas import DataFrame
 import requests
+from pandas import DataFrame
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger("Utils")

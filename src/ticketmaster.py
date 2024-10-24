@@ -1,28 +1,19 @@
-"""
-Calls Ticketmaster API endpoint to get event data in Amsterdam
-based on the artist that was collected from Spotify playlist API
-and format the data.
-"""
+import logging
+import os
+from typing import Collection
+
+import pandas as pd
+from dotenv import load_dotenv  # pip3 install python-dotenv
+from requests import Session
 
 from helpers.spotify.variables import SPOTIFY_PROCESSED_DATA_PATH
-import os
-import logging
-from dotenv import load_dotenv  # pip3 install python-dotenv
-from helpers.ticketmaster.variables import (
-    CITY,
-    TICKETMASTER_API_URL,
-    Event,
-    TICKETMASTER_RAW_DATA_PATH,
-    TICKETMASTER_RAW_FILENAME,
-    TICKETMASTER_PROCESSED_DATA_PATH,
-    TICKETMASTER_PROCESSED_FILENAME,
-)
-from helpers.utils import create_session, list_files
 from helpers.ticketmaster.api_requests import request_ticketmaster_endpoint
-from helpers.utils import save_as_parquet
-import pandas as pd
-from requests import Session
-from typing import Collection
+from helpers.ticketmaster.variables import (CITY, TICKETMASTER_API_URL,
+                                            TICKETMASTER_PROCESSED_DATA_PATH,
+                                            TICKETMASTER_PROCESSED_FILENAME,
+                                            TICKETMASTER_RAW_DATA_PATH,
+                                            TICKETMASTER_RAW_FILENAME, Event)
+from helpers.utils import create_session, list_files, save_as_parquet
 
 load_dotenv()
 
@@ -34,6 +25,11 @@ logger = logging.getLogger("TICKETMASTER")
 
 
 class TicketmasterAPI:
+    """Calls Ticketmaster API endpoint to get event data in Amsterdam
+    based on the artist that was collected from Spotify playlist API
+    and format the data.
+    """
+
     def __init__(self):
         self.artists: list = []
         self.all_events: list[dict[str, Collection[Event]]] = []
@@ -122,24 +118,24 @@ class TicketmasterAPI:
         """
         logger.info(f"Found events for artist {artist.title()}")
         for event in events:
-            event_details = {
-                "event_name": event.get("name", None),
-                "event_id": event.get("id", None),
-                "event_url": event.get("url", None),
-                "event_date": event.get("dates", dict())
+            event_details = dict(
+                event_name=event.get("name", None),
+                event_id=event.get("id", None),
+                event_url=event.get("url", None),
+                event_date=event.get("dates", dict())
                 .get("start", dict())
                 .get("localDate", None),
-                "event_time": event.get("dates", dict())
+                event_time=event.get("dates", dict())
                 .get("start", dict())
                 .get("localTime", None),
-                "event_timezone": event.get("dates", dict()).get("timezone", dict()),
-                "event_genre": [
+                event_timezone=event.get("dates", dict()).get("timezone", dict()),
+                event_genre=[
                     genre.get("genre") for genre in event.get("classifications", list())
                 ],
-                "event_venue": [
+                event_venue=list(
                     venue
                     for venue in event.get("_embedded", dict()).get("venues", None)
-                ],
-            }
+                ),
+            )
 
             self.all_events.append({"artist": artist, **event_details})

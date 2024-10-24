@@ -3,6 +3,7 @@ Main file to run the event finder
 """
 
 import logging
+
 from ticketmaster import TicketmasterAPI
 
 logging.basicConfig(level=logging.INFO)
