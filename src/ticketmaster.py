@@ -104,13 +104,13 @@ class TicketmasterAPI:
             TICKETMASTER_RAW_DATA_PATH + "/" + TICKETMASTER_RAW_FILENAME
         )
         for _, column in df.iterrows():
-            artist_field = column["_links"].get("self", dict()).get("href")
+            artist_field = column["_links"].get("self", {}).get("href")
             artist = artist_field.split("=")[-1].replace("_", " ")
             if not column["_embedded"]:
                 logger.info(f"No events found for {artist.title()}")
                 continue
 
-            events = column.get("_embedded", dict()).get("events")
+            events = column.get("_embedded", {}).get("events")
             self.parse_events(events, artist)
 
     def parse_events(self, events: dict, artist: str) -> None:
@@ -126,19 +126,18 @@ class TicketmasterAPI:
                 event_name=event.get("name", None),
                 event_id=event.get("id", None),
                 event_url=event.get("url", None),
-                event_date=event.get("dates", dict())
-                .get("start", dict())
+                event_date=event.get("dates", {})
+                .get("start", {})
                 .get("localDate", None),
-                event_time=event.get("dates", dict())
-                .get("start", dict())
+                event_time=event.get("dates", {})
+                .get("start", {})
                 .get("localTime", None),
-                event_timezone=event.get("dates", dict()).get("timezone", dict()),
+                event_timezone=event.get("dates", {}).get("timezone", {}),
                 event_genre=[
-                    genre.get("genre") for genre in event.get("classifications", list())
+                    genre.get("genre") for genre in event.get("classifications", [])
                 ],
                 event_venue=list(
-                    venue
-                    for venue in event.get("_embedded", dict()).get("venues", None)
+                    venue for venue in event.get("_embedded", {}).get("venues", None)
                 ),
             )
 
