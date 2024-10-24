@@ -1,13 +1,13 @@
+from typing import TypedDict, Union
+
 import pandas as pd
 from pandas import DataFrame
-from src.helpers.variables import SPOTIFY_PROCESSED_DATA_PATH
+
+from src.helpers.spotify.variables import SPOTIFY_PROCESSED_DATA_PATH
 from src.helpers.utils import list_files
-from typing import Union, TypedDict
 
 # TODO: load data in DB
 # TODO: read data from DB
-
-DATE_FORMAT = "YYYY-MM-DD"
 
 
 class ArtistSongs(TypedDict):
@@ -22,7 +22,7 @@ def _read_all_files() -> DataFrame:
         DataFrame: all song details in DataFrame
     """
     files = list_files(SPOTIFY_PROCESSED_DATA_PATH)
-    all_dfs: list = list()
+    all_dfs: list = []
     for file in files:
         df = pd.read_parquet(file)
         all_dfs.append(df)
@@ -36,7 +36,7 @@ def retrieve_all_artists() -> list:
     Returns:
         list: list of all artists
     """
-    df = _read_all_files
+    df = _read_all_files()
     # TODO: maybe parallel processing
     artists = df["main_artist"].unique().tolist()
     return artists
@@ -46,7 +46,8 @@ def retrieve_all_songs_from_artist(
     artist: str,
 ) -> Union[ArtistSongs, list[ArtistSongs]]:
     """Return artist and it's songs.
-    If given only part of Artist name finds all artists with given phrase/character and returns all artists and their songs
+    If given only part of Artist name finds all artists
+    with given phrase/character and returns all artists and their songs
 
     Args:
         artist (str): Artis name or part of it
@@ -64,7 +65,7 @@ def retrieve_all_songs_from_artist(
             return f"No such artist - {artist } found"
 
         artists = artist_df["main_artist"].unique().tolist()
-        collection: list = list()
+        collection: list = []
         for unique_artist in artists:
             songs = artist_df[artist_df["main_artist"] == unique_artist][
                 "song_title"
@@ -76,16 +77,24 @@ def retrieve_all_songs_from_artist(
     return {artist: songs}
 
 
-def retrieve_details_based_on_dates(start: str, end: str, date_type) -> list:
+def retrieve_details_based_on_dates(start: str, end: str, date_type: str) -> list:
+    """Retrieves song details based on given start
+    and end date for either release date or added_at date
+
+    Args:
+        start (str): start date
+        end (str): end date
+        date_type (str): release date or added_at date
+
+    Returns:
+        list: list of songs and artis name
+    """
     df = _read_all_files()
 
     specified_timeframe_df = df[(df[date_type] >= start) & (df[date_type] <= end)]
 
     if specified_timeframe_df:
         return f"No data found with start date {start}, end date {end} for date type {date_type}"
-    import pdb
-
-    pdb.set_trace()
     result = (
         specified_timeframe_df[["main_artist", "song_title", date_type]]
         .apply(lambda x: x.to_dict(), axis=1)

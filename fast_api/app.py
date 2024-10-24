@@ -1,10 +1,12 @@
+import enum
+
 from fastapi import FastAPI, HTTPException
+
 from fast_api.queries import (
     retrieve_all_artists,
     retrieve_all_songs_from_artist,
     retrieve_details_based_on_dates,
 )
-import enum
 
 DATE_FORMAT = "YYYY-MM-DD"
 

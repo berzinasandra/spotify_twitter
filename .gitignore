@@ -1,6 +1,7 @@
-
+.env
 data/
 src/__pycache__
 src/helpers/__pycache__/
-event/
+env/
 fast_api/__pycache__/
+src/helpers/ticketmaster/__pycache__

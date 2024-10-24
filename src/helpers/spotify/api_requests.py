@@ -1,10 +1,12 @@
 import functools
-from dotenv import load_dotenv  # pip3 install python-dotenv
 import logging
-from typing import Any
-import requests
-from requests import Response
 import os
+from typing import Any
+
+import requests
+from dotenv import load_dotenv  # pip3 install python-dotenv
+from requests import Response
+
 from helpers.utils import save_as_parquet
 
 load_dotenv()
@@ -123,7 +125,11 @@ def retrieve_data(
         None, writes to disk
     """
     import pandas as pd
-    from helpers.variables import SPOTIFY_RAW_DATA_PATH, TICKETMASTER_RAW_DATA_PATH
+
+    from src.helpers.spotify.variables import (
+        SPOTIFY_RAW_DATA_PATH,
+        TICKETMASTER_RAW_DATA_PATH,
+    )
 
     response = _request_endpoint(service, url, offset, spotify_token)
     if _unsecessful_request(response, service) and service == "spotify":
