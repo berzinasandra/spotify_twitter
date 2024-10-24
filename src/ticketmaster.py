@@ -8,11 +8,15 @@ from requests import Session
 
 from helpers.spotify.variables import SPOTIFY_PROCESSED_DATA_PATH
 from helpers.ticketmaster.api_requests import request_ticketmaster_endpoint
-from helpers.ticketmaster.variables import (CITY, TICKETMASTER_API_URL,
-                                            TICKETMASTER_PROCESSED_DATA_PATH,
-                                            TICKETMASTER_PROCESSED_FILENAME,
-                                            TICKETMASTER_RAW_DATA_PATH,
-                                            TICKETMASTER_RAW_FILENAME, Event)
+from helpers.ticketmaster.variables import (
+    CITY,
+    TICKETMASTER_API_URL,
+    TICKETMASTER_PROCESSED_DATA_PATH,
+    TICKETMASTER_PROCESSED_FILENAME,
+    TICKETMASTER_RAW_DATA_PATH,
+    TICKETMASTER_RAW_FILENAME,
+    Event,
+)
 from helpers.utils import create_session, list_files, save_as_parquet
 
 load_dotenv()

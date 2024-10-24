@@ -126,8 +126,10 @@ def retrieve_data(
     """
     import pandas as pd
 
-    from src.helpers.spotify.variables import (SPOTIFY_RAW_DATA_PATH,
-                                               TICKETMASTER_RAW_DATA_PATH)
+    from src.helpers.spotify.variables import (
+        SPOTIFY_RAW_DATA_PATH,
+        TICKETMASTER_RAW_DATA_PATH,
+    )
 
     response = _request_endpoint(service, url, offset, spotify_token)
     if _unsecessful_request(response, service) and service == "spotify":

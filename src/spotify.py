@@ -6,8 +6,11 @@ from dotenv import load_dotenv  # pip3 install python-dotenv
 from pandas import DataFrame
 
 from helpers.spotify.api_requests import get_token, retrieve_data
-from helpers.spotify.variables import (SPOTIFY_PROCESSED_DATA_PATH,
-                                       SPOTIFY_RAW_DATA_PATH, Artist)
+from helpers.spotify.variables import (
+    SPOTIFY_PROCESSED_DATA_PATH,
+    SPOTIFY_RAW_DATA_PATH,
+    Artist,
+)
 from helpers.utils import list_files, read_file, save_as_parquet
 
 logging.basicConfig(level=logging.INFO)
