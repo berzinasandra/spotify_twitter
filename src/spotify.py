@@ -1,9 +1,10 @@
 import logging
+import os
 
 import pandas as pd
+from dotenv import load_dotenv
 from pandas import DataFrame
 
-from constants import SPOTIFY_SHAZAM_PLAYLIST_ID, SPOTIFY_STAR_PLAYLIST_ID
 from helpers.spotify.api_requests import get_token, retrieve_data
 from helpers.spotify.variables import (
     SPOTIFY_PROCESSED_DATA_PATH,
@@ -15,6 +16,10 @@ from helpers.utils import list_files, read_file, save_as_parquet
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger("SPOTIFY")
 logger.setLevel(logging.INFO)
+
+load_dotenv()
+SPOTIFY_SHAZAM_PLAYLIST_ID = os.getenv("SPOTIFY_SHAZAM_PLAYLIST_ID")
+SPOTIFY_STAR_PLAYLIST_ID = os.getenv("SPOTIFY_STAR_PLAYLIST_ID")
 
 
 class SpotifyAPI:

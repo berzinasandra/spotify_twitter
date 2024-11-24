@@ -1,10 +1,11 @@
 import logging
+import os
 from typing import Collection
 
 import pandas as pd
+from dotenv import load_dotenv  # pip3 install python-dotenv
 from requests import Session
 
-from constants import TICKETMASTER_KEY
 from helpers.spotify.variables import SPOTIFY_PROCESSED_DATA_PATH
 from helpers.ticketmaster.api_requests import request_ticketmaster_endpoint
 from helpers.ticketmaster.variables import (
@@ -18,6 +19,10 @@ from helpers.ticketmaster.variables import (
 )
 from helpers.utils import create_session, list_files, save_as_parquet
 
+load_dotenv()
+
+
+TICKETMASTER_KEY = os.getenv("TICKETMASTER_KEY")
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger("TICKETMASTER")
 
