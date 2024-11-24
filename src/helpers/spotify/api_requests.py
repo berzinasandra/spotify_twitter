@@ -1,24 +1,16 @@
 import functools
 import logging
-import os
 from typing import Any
 
 import requests
-from dotenv import load_dotenv  # pip3 install python-dotenv
 from requests import Response
 
+from constants import SPOTIFY_CLIENT_ID, SPOTIFY_CLIENT_SECRET
 from helpers.utils import save_as_parquet
-
-load_dotenv()
-
-SPOTIFY_CLIENT_ID = os.getenv("SPOTIFY_CLIENT_ID")
-SPOTIFY_CLIENT_SECRET = os.getenv("SPOTIFY_CLIENT_SECRET")
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger("REQUESTS")
 logger.setLevel(logging.INFO)
-
-load_dotenv()
 
 
 def _make_spotify_request(url: str, offset: int, spotify_token: str) -> Response:
@@ -63,11 +55,11 @@ def _retrieve_items(response: Response, service: str) -> list[dict[Any, Any]]:
     """Fetch data from API response
 
     Args:
-        response (Response): API call's resposne
+        response (Response): API call's response
         service (str): service name
 
     Returns:
-        list[dict[Any, Any]]: retrieved items of responce
+        list[dict[Any, Any]]: retrieved items of response
     """
     if 300 > response.status_code >= 200:
         items = response.json()

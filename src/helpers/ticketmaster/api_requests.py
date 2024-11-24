@@ -1,3 +1,4 @@
+import functools
 import logging
 
 import requests
@@ -7,6 +8,7 @@ logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger("TICKETMASTER")
 
 
+@functools.cache
 def request_ticketmaster_endpoint(url: str, session: Session) -> dict:
     """Call given Ticketmaster API and return request response
 

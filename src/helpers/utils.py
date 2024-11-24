@@ -4,6 +4,7 @@ from glob import glob
 import pandas as pd
 import requests
 from pandas import DataFrame
+from requests import Session
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger("Utils")
@@ -51,7 +52,12 @@ def list_files(path: str) -> list[str]:
     return files
 
 
-def create_session():
+def create_session() -> Session:
+    """Creates Requests Session
+
+    Returns:
+        Session
+    """
     logger.info("Creating Requests Session...")
     session = requests.Session()
     return session
