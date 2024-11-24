@@ -54,7 +54,6 @@ def list_files(path: str) -> list[str]:
 
 def create_session() -> Session:
     """Creates Requests Session
-
     Returns:
         Session
     """

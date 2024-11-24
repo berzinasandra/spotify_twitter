@@ -5,3 +5,4 @@ src/helpers/__pycache__/
 env/
 fast_api/__pycache__/
 src/helpers/ticketmaster/__pycache__
+src/helpers/spotify/__pycache__/
