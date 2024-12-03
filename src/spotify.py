@@ -2,7 +2,7 @@ import logging
 import os
 
 import pandas as pd
-from dotenv import load_dotenv  # pip3 install python-dotenv
+from dotenv import load_dotenv
 from pandas import DataFrame
 
 from helpers.spotify.api_requests import get_token, retrieve_data

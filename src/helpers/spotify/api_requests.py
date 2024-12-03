@@ -18,8 +18,6 @@ logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger("REQUESTS")
 logger.setLevel(logging.INFO)
 
-load_dotenv()
-
 
 def _make_spotify_request(url: str, offset: int, spotify_token: str) -> Response:
     """Make a request to Spotify API
@@ -30,7 +28,7 @@ def _make_spotify_request(url: str, offset: int, spotify_token: str) -> Response
         spotify_token (str): spotify token
 
     Returns:
-        Response: Spotify request resposne
+        Response: Spotify request response
     """
     token = spotify_token
     header = {"Authorization": f"Bearer {token}", "Content-Type": "application/json"}
@@ -63,11 +61,11 @@ def _retrieve_items(response: Response, service: str) -> list[dict[Any, Any]]:
     """Fetch data from API response
 
     Args:
-        response (Response): API call's resposne
+        response (Response): API call's response
         service (str): service name
 
     Returns:
-        list[dict[Any, Any]]: retrieved items of responce
+        list[dict[Any, Any]]: retrieved items of response
     """
     if 300 > response.status_code >= 200:
         items = response.json()

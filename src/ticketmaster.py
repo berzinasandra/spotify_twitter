@@ -1,5 +1,6 @@
 import logging
 import os
+from time import sleep
 from typing import Collection
 
 import pandas as pd
@@ -21,9 +22,7 @@ from helpers.utils import create_session, list_files, save_as_parquet
 
 load_dotenv()
 
-
 TICKETMASTER_KEY = os.getenv("TICKETMASTER_KEY")
-
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger("TICKETMASTER")
 
@@ -43,7 +42,7 @@ class TicketmasterAPI:
     def run(self):
         """Executes Ticketmaster API class.
         1. Reads all processed files from spotify
-        2. Gets unique artists TODO: save unique artists soemwhere else.
+        2. Gets unique artists TODO: save unique artists somewhere else.
         3. Query Ticketmaster API
         4. Save results (for now locally) TODO: upgrade this
         5. Process results & save locally
@@ -54,6 +53,8 @@ class TicketmasterAPI:
         for i, artist in enumerate(self.artists, start=1):
             logger.info(f"Starting to search for artist {i}/{len(self.artists)}...")
             self._retrieve_event(artist, session)
+            logger.info("Sleeping for 10 sec between next event search...")
+            sleep(10)
         df = pd.DataFrame(self.raw_events)
         save_as_parquet(df, TICKETMASTER_RAW_DATA_PATH + TICKETMASTER_RAW_FILENAME)
         self.parse_data()
@@ -63,7 +64,7 @@ class TicketmasterAPI:
             df, TICKETMASTER_PROCESSED_DATA_PATH + TICKETMASTER_PROCESSED_FILENAME
         )
 
-    def _collect_unique_artists(self, files: list):
+    def _collect_unique_artists(self, files: list) -> None:
         """Goes over all files with data collected from Spotify and retrieves unique artists
 
         Args:
@@ -80,7 +81,7 @@ class TicketmasterAPI:
         """Using Ticketmaster APi, based on artist and city searches for any event information.
 
         Args:
-            artist (str): name of the artis
+            artist (str): name of the artist
         """
         if artist in self.checked_artists:
             return
@@ -89,6 +90,8 @@ class TicketmasterAPI:
 
         # Can't have whitespaces in artist name
         artist = artist.lower().replace(" ", "_").replace("-", "_")
+        if not TICKETMASTER_KEY:
+            raise KeyError("Missing Ticketmaster Key!")
         url = f"{TICKETMASTER_API_URL}{artist}&city={CITY}&apikey={TICKETMASTER_KEY}"
 
         logger.info(f"Looking for events for artist {artist} - {url}")
@@ -98,7 +101,7 @@ class TicketmasterAPI:
     def parse_data(self) -> None:
         """
         Reads file with raw data from ticketmaster API and checks if there are any events
-        collected for artist. If any, collected data is pased for detail parsing
+        collected for artist. If any, collected data is passed for detail parsing
         """
         df = pd.read_parquet(
             TICKETMASTER_RAW_DATA_PATH + "/" + TICKETMASTER_RAW_FILENAME
@@ -117,7 +120,7 @@ class TicketmasterAPI:
         """Parse details from events
 
         Args:
-            events (dict): dict of all collected events for given artis
+            events (dict): dict of all collected events for given artist
             artist (str): artist name
         """
         logger.info(f"Found events for artist {artist.title()}")

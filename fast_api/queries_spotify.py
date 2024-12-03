@@ -1,10 +1,7 @@
 from typing import TypedDict, Union
 
-import pandas as pd
-from pandas import DataFrame
-
+from fast_api.common import read_all_files
 from src.helpers.spotify.variables import SPOTIFY_PROCESSED_DATA_PATH
-from src.helpers.utils import list_files
 
 # TODO: load data in DB
 # TODO: read data from DB
@@ -15,29 +12,13 @@ class ArtistSongs(TypedDict):
     songs: list
 
 
-def _read_all_files() -> DataFrame:
-    """Gathers all details in Spotify Processed directory into one DataFrame
-
-    Returns:
-        DataFrame: all song details in DataFrame
-    """
-    files = list_files(SPOTIFY_PROCESSED_DATA_PATH)
-    all_dfs: list = []
-    for file in files:
-        df = pd.read_parquet(file)
-        all_dfs.append(df)
-    main_df = pd.concat(all_dfs)
-    return main_df
-
-
-def retrieve_all_artists() -> list:
+def retrieve_all_artists() -> list[str]:
     """Gets a list of all main artists who's record(s) is collected from Spotify
 
     Returns:
         list: list of all artists
     """
-    df = _read_all_files()
-    # TODO: maybe parallel processing
+    df = read_all_files(SPOTIFY_PROCESSED_DATA_PATH)
     artists = df["main_artist"].unique().tolist()
     return artists
 
@@ -50,13 +31,13 @@ def retrieve_all_songs_from_artist(
     with given phrase/character and returns all artists and their songs
 
     Args:
-        artist (str): Artis name or part of it
+        artist (str): Artist name or part of it
 
     Returns:
         Union[ArtistSongs, list[ArtistSongs]]: artist and their songs
     """
 
-    df = _read_all_files()
+    df = read_all_files(SPOTIFY_PROCESSED_DATA_PATH)
     artist = artist.title()
     artist_df = df[df["main_artist"] == artist]
     if artist_df.empty:
@@ -77,7 +58,9 @@ def retrieve_all_songs_from_artist(
     return {artist: songs}
 
 
-def retrieve_details_based_on_dates(start: str, end: str, date_type: str) -> list:
+def retrieve_details_based_on_dates(
+    start: str, end: str, date_type: str
+) -> list[dict[str, str]]:
     """Retrieves song details based on given start
     and end date for either release date or added_at date
 
@@ -87,9 +70,9 @@ def retrieve_details_based_on_dates(start: str, end: str, date_type: str) -> lis
         date_type (str): release date or added_at date
 
     Returns:
-        list: list of songs and artis name
+        list: list of songs and artist name
     """
-    df = _read_all_files()
+    df = read_all_files(SPOTIFY_PROCESSED_DATA_PATH)
 
     specified_timeframe_df = df[(df[date_type] >= start) & (df[date_type] <= end)]
 
