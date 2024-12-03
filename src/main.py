@@ -24,4 +24,4 @@ def run_event_detector():
 # alembic
 
 if "__main__" == __name__:
-    print(run_event_detector())
+    run_event_detector()

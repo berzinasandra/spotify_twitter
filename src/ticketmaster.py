@@ -1,5 +1,6 @@
 import logging
 import os
+from time import sleep
 from typing import Collection
 
 import pandas as pd
@@ -20,7 +21,6 @@ from helpers.ticketmaster.variables import (
 from helpers.utils import create_session, list_files, save_as_parquet
 
 load_dotenv()
-
 
 TICKETMASTER_KEY = os.getenv("TICKETMASTER_KEY")
 logging.basicConfig(level=logging.INFO)
@@ -53,6 +53,8 @@ class TicketmasterAPI:
         for i, artist in enumerate(self.artists, start=1):
             logger.info(f"Starting to search for artist {i}/{len(self.artists)}...")
             self._retrieve_event(artist, session)
+            logger.info("Sleeping for 10 sec between next event search...")
+            sleep(10)
         df = pd.DataFrame(self.raw_events)
         save_as_parquet(df, TICKETMASTER_RAW_DATA_PATH + TICKETMASTER_RAW_FILENAME)
         self.parse_data()
@@ -88,6 +90,8 @@ class TicketmasterAPI:
 
         # Can't have whitespaces in artist name
         artist = artist.lower().replace(" ", "_").replace("-", "_")
+        if not TICKETMASTER_KEY:
+            raise KeyError("Missing Ticketmaster Key!")
         url = f"{TICKETMASTER_API_URL}{artist}&city={CITY}&apikey={TICKETMASTER_KEY}"
 
         logger.info(f"Looking for events for artist {artist} - {url}")
