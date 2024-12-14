@@ -4,6 +4,7 @@ Main file to run the event finder
 
 import logging
 from spotify import SpotifyAPI
+from ticketmaster import TicketmasterAPI
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger("MAIN")
@@ -18,9 +19,7 @@ def search_events():
         list: list of events
     """
     SpotifyAPI().run()
-    # events = TicketmasterAPI(tracks).run() if tracks else None
-
-    # return [event.get("artist") for event in events if event]
+    TicketmasterAPI().run()
 
 
 # Add cash to Spotify api

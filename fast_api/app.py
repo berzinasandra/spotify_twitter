@@ -10,6 +10,10 @@ DATE_FORMAT = "YYYY-MM-DD"
 
 
 class DateType(enum):
+    """
+    Enum for song dates
+    """
+
     ADDED_AT = "added_at"
     RELEASE_DATE = "release_date"
 
